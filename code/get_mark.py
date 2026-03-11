@@ -81,22 +81,23 @@ def get_ects_and_scaled_grade(country_name: str, grade_value: float):
 
 
 # === Process per student ===
-for student, student_df in df_student.groupby("Student"):
-    results = student_df.apply(
-        lambda r: get_ects_and_scaled_grade(r["Country"], r["Grade"]),
-        axis=1,
-    )
+for (student, generate), student_df in df_student.groupby(["Student", "Generate"]):
+    if generate:
+        results = student_df.apply(
+            lambda r: get_ects_and_scaled_grade(r["Country"], r["Grade"]),
+            axis=1,
+        )
 
-    results_df = pd.DataFrame(results.tolist())
-    results_df.insert(0, "Student", student)
+        results_df = pd.DataFrame(results.tolist())
+        results_df.insert(0, "Student", student)
 
-    # Save one Excel per student
-    output_file = (
-        output_dir
-        / f"{date.today()}-{student}-{"_".join(sorted(student_df["Country"].unique()))}.xlsx"
-    )
-    results_df.to_excel(output_file, index=False)
+        # Save one Excel per student
+        output_file = (
+            output_dir
+            / f"{date.today()}-{student}-{"_".join(sorted(student_df["Country"].unique()))}.xlsx"
+        )
+        results_df.to_excel(output_file, index=False)
 
-    # Print
-    print(f"\n=== {student} ===")
-    print(results_df)
+        # Print
+        print(f"\n=== {student} ===")
+        print(results_df)
