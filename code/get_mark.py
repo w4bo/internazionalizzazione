@@ -71,6 +71,8 @@ def get_ects_and_scaled_grade(country_name: str, grade_value: float):
         "Country": country_name,
         "Local Grade": grade_value,
         "ECTS Grade": ects_grade,
+        "Ext min": ects_min,
+        "Ext max": ects_max,
         "ITA Min": italian_equiv["IT_Min"],
         "ITA Max": italian_equiv["IT_Max"],
         "Scaled Linear (18–31)": round(scaled_linear, 2),
