@@ -96,7 +96,7 @@ for (student, generate), student_df in df_student.groupby(["Student", "Generate"
         # Save one Excel per student
         output_file = (
             output_dir
-            / f"{date.today()}-{student}-{"_".join(sorted(student_df["Country"].unique()))}.xlsx"
+            / f"{date.today()}-{student}-{'_'.join(sorted(student_df['Country'].unique()))}.xlsx"
         )
         results_df.to_excel(output_file, index=False)
 
