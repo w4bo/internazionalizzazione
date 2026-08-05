@@ -79,6 +79,7 @@ def get_ects_and_scaled_grade(country_name: str, grade_value: float):
         "Scaled within ECTS (18–31)": (
             None if scaled_ects is None else round(scaled_ects)
         ),
+        "Comment": row["Comment"] if "Comment" in row else "",
     }
 
 
