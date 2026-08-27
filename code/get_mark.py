@@ -20,7 +20,7 @@ italian_mapping = {
 }
 
 
-def get_ects_and_scaled_grade(country_name: str, grade_value: float):
+def get_ects_and_scaled_grade(country_name: str, grade_value: float, comment: str):
     subset = df[df["Country"].str.lower() == country_name.lower()].copy()
     if subset.empty:
         raise ValueError(f"No ECTS data found for country: {country_name}")
@@ -79,7 +79,7 @@ def get_ects_and_scaled_grade(country_name: str, grade_value: float):
         "Scaled within ECTS (18–31)": (
             None if scaled_ects is None else round(scaled_ects)
         ),
-        "Comment": row["Comment"] if "Comment" in row else "",
+        "Comment": comment,
     }
 
 
@@ -87,7 +87,7 @@ def get_ects_and_scaled_grade(country_name: str, grade_value: float):
 for (student, generate), student_df in df_student.groupby(["Student", "Generate"]):
     if generate:
         results = student_df.apply(
-            lambda r: get_ects_and_scaled_grade(r["Country"], r["Grade"]),
+            lambda r: get_ects_and_scaled_grade(r["Country"], r["Grade"], r["Comment"]),
             axis=1,
         )
 
