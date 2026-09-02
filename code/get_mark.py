@@ -10,7 +10,7 @@ df_student = pd.read_csv("student_grades.csv")
 output_dir = Path("voti")
 output_dir.mkdir(exist_ok=True)
 
-# UNIBO ECTS → Italian mapping (A.A. 2024–25)
+# UNIBO ECTS → Italian mapping (A.A. 2024-25)
 italian_mapping = {
     "A": {"IT_Min": 31, "IT_Max": 31},
     "B": {"IT_Min": 29, "IT_Max": 30},
@@ -20,7 +20,13 @@ italian_mapping = {
 }
 
 
-def get_ects_and_scaled_grade(country_name: str, grade_value: float, comment: str):
+def get_ects_and_scaled_grade(
+    country_name: str,
+    grade_value: float,
+    comment: str,
+    esame_estero: str,
+    esame_unibo: str,
+):
     subset = df[df["Country"].str.lower() == country_name.lower()].copy()
     if subset.empty:
         raise ValueError(f"No ECTS data found for country: {country_name}")
@@ -69,17 +75,17 @@ def get_ects_and_scaled_grade(country_name: str, grade_value: float, comment: st
 
     return {
         "Country": country_name,
-        "Local Grade": grade_value,
-        "ECTS Grade": ects_grade,
         "Ext min": ects_min,
         "Ext max": ects_max,
         "ITA Min": italian_equiv["IT_Min"],
         "ITA Max": italian_equiv["IT_Max"],
-        "Scaled Linear (18–31)": round(scaled_linear, 2),
-        "Scaled within ECTS (18–31)": (
-            None if scaled_ects is None else round(scaled_ects)
-        ),
+        "Scaled Linear (18-31)": round(scaled_linear, 2),
         "Comment": comment,
+        "Esame estero": esame_estero,
+        "Esame UniBO": esame_unibo,
+        "Voto estero": grade_value,
+        "Conversione ECTS": ects_grade,
+        "Voto UniBO": (None if scaled_ects is None else round(scaled_ects)),
     }
 
 
@@ -87,7 +93,13 @@ def get_ects_and_scaled_grade(country_name: str, grade_value: float, comment: st
 for (student, generate), student_df in df_student.groupby(["Student", "Generate"]):
     if generate:
         results = student_df.apply(
-            lambda r: get_ects_and_scaled_grade(r["Country"], r["Grade"], r["Comment"]),
+            lambda r: get_ects_and_scaled_grade(
+                r["Country"],
+                r["Grade"],
+                r["Comment"],
+                r["Esame estero"],
+                r["Esame UniBO"],
+            ),
             axis=1,
         )
 
@@ -100,7 +112,15 @@ for (student, generate), student_df in df_student.groupby(["Student", "Generate"
             / f"{date.today()}-{student}-{'_'.join(sorted(student_df['Country'].unique()))}.xlsx"
         )
         results_df.to_excel(output_file, index=False)
-
         # Print
         print(f"\n=== {student} ===")
-        print(results_df)
+        print(
+            results_df[
+                [
+                    "Esame estero",
+                    "Esame UniBO",
+                    "Conversione ECTS",
+                    "Voto UniBO",
+                ]
+            ].to_markdown(index=False)
+        )
